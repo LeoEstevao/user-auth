@@ -34,6 +34,29 @@ app.post('/register', (req, res) => {
 
 })
 
+
+app.post('/login', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    createConnection().then( async connection => {
+        const userRepository = getRepository(User);
+
+        await userRepository.findOne({
+            username,
+            password
+        }).then( result => {
+            if(!result)
+            return res.json({
+                message: "User not found!"
+            })
+            return res.json(result)
+            // return res.redirect();
+        })
+        connection.close();
+    })
+})
+
 app.listen(3333,() => {
     console.log('Server running')
 });
