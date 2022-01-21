@@ -6,14 +6,20 @@ const router = Router();
 
 import bcrypt from 'bcryptjs';
 
-// 
+// Creating new sessions variables without typescript types Error warning
+declare module "express-session" {
+    interface Session {
+        user: string;
+    }
+}
 
 router.get('/', (req, res) => {
-    res.send('Home page');
+    if(req.session.user)
+        return res.send('Welcome ' + req.session.user)
+    return res.send('Home page');
 })
 
 router.post('/register', (req, res) => {
-    
     createConnection().then( async connection => {
         const salt = bcrypt.genSaltSync(12)
         const hash = bcrypt.hashSync(req.body.password, salt);
@@ -28,7 +34,7 @@ router.post('/register', (req, res) => {
         }).then( result => {
             res.json(result)
         })
-
+        
         connection.close()
     })
 
@@ -49,13 +55,25 @@ router.post('/login', (req, res) => {
             return res.json({
                 message: "User not found!"
             })
+
             const userIsAuth = bcrypt.compareSync(password, result.password)
+            
             if(!userIsAuth)
                 return res.status(403).json({message:'Wrong Password'});
+            
+            req.session.user = result.username
             return res.json({message: "User authorized!", result})
         })
+
         connection.close();
     })
+})
+
+router.get('/logout', (req, res) => {
+    req.session.destroy( err => {
+        console.log('User logout!')
+    })
+    return res.redirect('/')
 })
 
 export default router;
