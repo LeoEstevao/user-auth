@@ -4,21 +4,25 @@ import { createConnection, getRepository } from 'typeorm';
 import User from './database/models/User';
 const router = Router();
 
+import bcrypt from 'bcryptjs';
+
+// 
+
 router.get('/', (req, res) => {
     res.send('Home page');
 })
 
 router.post('/register', (req, res) => {
-
+    
     createConnection().then( async connection => {
-
+        const salt = bcrypt.genSaltSync(12)
+        const hash = bcrypt.hashSync(req.body.password, salt);
         const username = req.body.username;
-        const password = req.body.password;
         const userRepository = getRepository(User);
 
         await userRepository.save({
             username,
-            password,
+            password: hash,
             isOnline: false,
             createdAt: new Date()
         }).then( result => {
@@ -40,14 +44,15 @@ router.post('/login', (req, res) => {
 
         await userRepository.findOne({
             username,
-            password
         }).then( result => {
             if(!result)
             return res.json({
                 message: "User not found!"
             })
-            return res.json({message: "user found", result })
-            // return res.redirect();
+            const userIsAuth = bcrypt.compareSync(password, result.password)
+            if(!userIsAuth)
+                return res.status(403).json({message:'Wrong Password'});
+            return res.json({message: "User authorized!", result})
         })
         connection.close();
     })

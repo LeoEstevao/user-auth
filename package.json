@@ -5,12 +5,14 @@
   "author": "Leonardo Estevao Dev-User <leooestevao@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.2",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.41"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.10",
     "ts-node-dev": "^1.1.8",
